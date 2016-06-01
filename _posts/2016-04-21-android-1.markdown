@@ -1,0 +1,304 @@
+---
+layout:     post
+title:      "漫谈android系统"
+subtitle:   " android编译系统 "
+date:       2016-04-21 10:05:00
+author:     "alex"
+header-img: "img/post/post-android-1.jpg"
+catalog: true
+tags:
+    - android
+---
+
+## android源码架构
+通过源码的架构，知道android源码在整个体系的code base充当什么样的角色，有助于理解android。
+
+```
+----------------
+├── Makefile            全局的Makefile
+├── build                  系统编译规则和配置所需要的脚本和工具
+----------------
+├── prebuilt	      各种平台编译工具链
+├── bionic                基础C库源代码
+----------------
+├── frameworks *         Android应用程序的核心框架层(java及C++语言)
+├── system     *            底层文件系统/库/应用及组件(C语言，init)
+├── dalvik                     JAVA虚拟机
+├── external            android使用的一些额外开源库
+├── libcore             与媒体播放框架代码相关
+----------------
+├── packages            各种应用程序实例
+├── development         程序开发所需要的实例/模板/工具
+----------------
+├── ndk
+├── sdk
+├── cts                 Android CTS兼容性规范测试用例
+----------------
+├── vendor              *        厂商定制代码
+├── device               *        厂商定制代码
+├── hardware          *        一些与硬件相关的库，部分厂家开源的硬解适配层HAL代码
+├── kernel                *        Linux源代码
+├── bootable           引导加载器（LK）
+----------------
+├── abi
+├── build.sh
+├── doc
+├── platform_testing
+├── art
+├── developers
+├── libnativehelper
+├── mkimage
+├── out                             产生的镜像
+├── pdk
+```
+
+## 如何获取源码。
+
+google有官方的方法下载。
+
+> http://source.android.com/source/downloading.html
+
+具体解决无法下载google源码方案：
+目前清华大学有相应的谷歌android镜像，感谢清华人对开源软件的支持。具体如下地址：https://lug.ustc.edu.cn/wiki/mirrors/help/aosp
+这里小编所使用的：
+
+>mkdir ~/bin
+
+>PATH=~/bin:$PATH
+
+>curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+
+> 如果上述 URL 不可访问，可以用下面的：
+
+> curl https://storage-googleapis.lug.ustc.edu.cn/git-repo-downloads/repo > ~/bin/repo
+
+>chmod a+x ~/bin/repo
+
+>mkdir androidM
+
+>cd androidM
+
+>repo init -u git://mirrors.ustc.edu.cn/aosp/platform/manifest -b android-6.0.1_r8
+
+> 如果提示无法连接到 gerrit.googlesource.com，可以编辑 ~/bin/repo，把 REPO_URL 一行替换成下面的：
+
+> REPO_URL = 'https://gerrit-googlesource.lug.ustc.edu.cn/git-repo'
+
+>repo sync -c -d
+
+## build系统
+  
+ android的源码是如何编译的？了解了这个有助于我们对android源码是如何构成的有直观的了解，现在，以android6.0的code为例，在这里对android的源码进行分析。
+
+整个build的make文件主要分为三类。
+第一类：build系统的核心文件，定义了整个build系统。其源码在build/core。
+第二类：主要给厂商做定义的make文件。其源码在device下。
+第三类：针对于每一个模块的make文件。如在模块目录下的Android.mk文件。
+ 
+### 如何使用build系统
+
+建立编译环境（以ubuntu为例）
+第一步：Android编译环境的搭建
+	安装必要的包：
+>sudo apt-get update
+（注意：以下指令，最好每一个都分开来敲入，以免部件安装不全。）
+
+>sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev lib32readline-gplv2-dev lib32z-dev libxml2-utils
+
+第二步：由于Ubuntu11.10里的gcc和g++版本太高了，你需要执行下面的操作：
+
+>sudo apt-get install gcc-4.4
+>sudo apt-get install g++-4.4
+>cd /usr/bin
+>sudo mv gcc gcc.bak 
+>sudo ln -s gcc-4.4 gcc
+>sudo mv g++ g++.bak
+>sudo ln -s g++-4.4 g++ 
+>sudo apt-get install g++-4.4-multilib
+
+此外还要装以下的包(否则会在之后编译me172v的时候会出错"/usr/bin/ld: cannot find -lstdc++")：
+
+>sudo apt-get install gcc-multilib g++-multilib libc6-i386 libc6-dev-i386	
+
+安装JDK：
+
+>sudo apt-get install openjdk-7-jdk
+
+
+## 选择相关的编译项
+
+使用命令
+
+>$ source build/envsetup.sh 
+
+>$ lunch
+
+>$ make 
+
+第一行命令“source build/envsetup.sh”引入了 build/envsetup.sh脚本。该脚本的作用是初始化编译环境，并引入一些辅助的 Shell 函数，这其中就包括第二步使用 lunch 函数。
+
+当可以执行lunch函数时，通常有一下命令可被执行。
+
+````
+croot	  切换到源码树的根目录
+m	      在源码树的根目录执行 make
+mm	      Build 当前目录下的模块
+mmm	      Build 指定目录下的模块
+cgrep	   在所有 C/C++ 文件上执行 grep
+jgrep	   在所有 Java 文件上执行 grep
+resgrep	   在所有 res/*.xml 文件上执行 grep
+printconfig	  显示当前 Build 的配置信息
+add_lunch_combo	 在 lunch 函数的菜单中添加一个条目
+lunch   函数的参数用来指定此次编译的目标设备以及编译类型。
+````
+
+当使用make的时候，直接调用的时makefile，而makefile中只有“include build/core/main.mk”，这样就将引入整个build系统。
+ 
+### 主要的 Make 文件的说明
+
+````
+文件名	                     说明
+main.mk	         最主要的 Make 文件，该文件中首先将对编译环境进行检查，同时引入其他的 Make 文件。另外，该文件中还定义了几个最主要的 Make 目标，例如 droid，sdk等。
+help.mk	        包含了名称为 help 的 Make 目标的定义，该目标将列出主要的 Make 目标及其说明。
+pathmap.mk	     将许多头文件的路径通过名值对的方式定义为映射表，并提供 include-path-for 函数来获取。例如，通过$(call include-path-for, frameworks-native)便可以获取到 framework本地代码需要的头文件路径。
+envsetup.mk  	 配置 Build 系统需要的环境变量，例如：TARGET_PRODUCT，TARGET_BUILD_VARIANT，HOST_OS，HOST_ARCH 等。当前编译的主机平台信息（例如操作系统，CPU 类型等信息）就是在这个文件中确定的。另外，该文件中还指定了各种编译结果的输出路径。
+combo/select.mk	 根据当前编译器的平台选择平台相关的 Make 文件。
+dumpvar.mk	     在 Build 开始之前，显示此次 Build 的配置信息。
+config.mk	     整个 Build 系统的配置文件，最重要的 Make 文件之一。该文件中主要包含以下内容：定义了许多的常量来负责不同类型模块的编译。定义编译器参数以及常见文件后缀，例如 .zip,.jar.apk。根据 BoardConfig.mk 文件，配置产品相关的参数。设置一些常用工具的路径，例如 flex，e2fsck，dx。
+definitions.mk	  最重要的 Make 文件之一，在其中定义了大量的函数。这些函数都是 Build 系统的其他文件将用到的。例如：my-dir，all-subdir-makefiles，find-subdir-files，sign-package 等，关于这些函数的说明请参见每个函数的代码注释。
+distdir.mk	      针对 dist 目标的定义。dist 目标用来拷贝文件到指定路径。
+dex_preopt.mk	  针对启动 jar 包的预先优化。
+pdk_config.mk	  顾名思义，针对 pdk（Platform Developement Kit）的配置文件。
+${ONE_SHOT_MAKEFILE}	ONE_SHOT_MAKEFILE 是一个变量，当使用“mm”编译某个目录下的模块时，此变量的值即为当前指定路径下的 Make 文件的路径。
+${subdir_makefiles}	各个模块的 Android.mk 文件的集合，这个集合是通过 Python 脚本扫描得到的。
+post_clean.mk	   在前一次 Build 的基础上检查当前 Build 的配置，并执行必要清理工作。
+legacy_prebuilts.mk	该文件中只定义了 GRANDFATHERED_ALL_PREBUILT 变量。
+Makefile	       被 main.mk 包含，该文件中的内容是辅助 main.mk 的一些额外内容。
+````
+
+### 其他主要 Make 目标
+
+````
+Make 目标	         说明
+make clean	         执行清理，等同于：rm -rf out/。
+make sdk	         编译出 Android 的 SDK。
+make clean-sdk	     清理 SDK 的编译产物。
+make update-api      更新 API。在 framework API 改动之后，需要首先执行该命令来更新 API，公开的 API 记录在 frameworks/base/api 目录下。
+make dist	         执行 Build，并将 MAKECMDGOALS 变量定义的输出文件拷贝到 /out/dist 目录。
+make all	          编译所有内容，不管当前产品的定义中是否会包含。
+make help	          帮助信息，显示主要的 make 目标。
+make snod	          从已经编译出的包快速重建系统镜像。（其实主要对system进行打包）
+make libandroid_runtime	  编译所有 JNI framework 内容。
+make framework	      编译所有 Java framework 内容。
+make services	      编译系统服务和相关内容。
+make <local_target>	  编译一个指定的模块，local_target 为模块的名称。
+make clean-<local_target>	清理一个指定模块的编译结果。
+make dump-products	   显示所有产品的编译配置信息，例如：产品名，产品支持的地区语言，产品中会包含的模块等信息。
+make bootimage	      生成 boot.img
+make recoveryimage	 生成 recovery.img
+make userdataimage	 生成 userdata.img
+make cacheimage	      生成 cache.img
+````
+
+### 在 Build 系统中添加新的内容
+
+当要开发一款新的 Android 产品的时候，我们首先需要在 Build 系统中添加对于该产品的定义。
+在 Android Build 系统中对产品定义的文件通常位于 device 目录下（另外还有一个可以定义产品的目录是 vender 目录，这是个历史遗留目录，Google 已经建议不要在该目录中进行定义，而应当选择 device 目录）。device 目录下根据公司名以及产品名分为二级目录。
+通常，对于一个产品的定义通常至少会包括四个文件：AndroidProducts.mk，产品版本定义文件，
+BoardConfig.mk 以及 verndorsetup.sh。
+
+````
+/device/qcom/xxxxx/AndroidProducts.mk：
+PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/titanium_64.mk
+````
+
+产品版本定义文件：顾名思义，该文件中包含了对于特定产品版本的定义。该文件可能不只一个，因为同一个产品可能会有多种版本（例如，面向中国地区一个版本，面向美国地区一个版本）。
+     文件中可以定义的变量以及含义
+
+```` 
+常量	                  说明
+PRODUCT_NAME	    最终用户将看到的完整产品名，会出现在“关于手机”信息中。
+PRODUCT_MODEL	    产品的型号，这也是最终用户将看到的。
+PRODUCT_LOCALES	    该产品支持的地区，以空格分格，例如：en_GB de_DE es_ES fr_CA。
+PRODUCT_PACKAGES	该产品版本中包含的 APK 应用程序，以空格分格，例如：Calendar Contacts。
+PRODUCT_DEVICE	     该产品的工业设计的名称。
+PRODUCT_MANUFACTURER	制造商的名称。
+PRODUCT_BRAND	     该产品专门定义的商标（如果有的话）。
+PRODUCT_PROPERTY_OVERRIDES	对于商品属性的定义。
+PRODUCT_COPY_FILES	   编译该产品时需要拷贝的文件，以“源路径 : 目标路径”的形式。
+PRODUCT_OTA_PUBLIC_KEYS	   对于该产品的 OTA 公开 key 的列表。
+PRODUCT_POLICY	产品使用的策略。
+PRODUCT_PACKAGE_OVERLAYS	指出是否要使用默认的资源或添加产品特定定义来覆盖。
+PRODUCT_CONTRIBUTORS_FILE	HTML 文件，其中包含项目的贡献者。
+PRODUCT_TAGS	该产品的标签，以空格分格。
+````
+
+### 添加新的模块
+
+在源码树中，一个模块的所有文件通常都位于同一个文件夹中。为了将当前模块添加到整个 Build 系统中，每个模块都需要一个专门的 Make 文件，该文件的名称为“Android.mk”。Build 系统会扫描名称为“Android.mk”的文件，并根据该文件中内容编译出相应的产物。
+
+需要注意的是：在 Android Build 系统中，编译是以模块（而不是文件）作为单位的，每个模块都有一个唯一的名称，一个模块的依赖对象只能是另外一个模块，而不能是其他类型的对象。对于已经编译好的二进制库，如果要用来被当作是依赖对象，那么应当将这些已经编译好的库作为单独的模块。对于这些已经编译好的库使用 BUILD_PREBUILT 或 BUILD_MULTI_PREBUILT。例如：当编译某个 Java 库需要依赖一些 Jar 包时，并不能直接指定 Jar 包的路径作为依赖，而必须首先将这些 Jar 包定义为一个模块，然后在编译 Java 库的时候通过模块的名称来依赖这些 Jar 包。
+
+Android.mk 文件通常以以下两行代码作为开头：
+
+````
+ LOCAL_PATH := $(call my-dir) 
+ include $(CLEAR_VARS)
+````
+
+这两行代码的作用是：
+设置当前模块的编译路径为当前文件夹路径。
+清理（可能由其他模块设置过的）编译环境中用到的变量。
+为了方便模块的编译，Build 系统设置了很多的编译环境变量。要编译一个模块，只要在编译之前根据需要设置这些变量然后执行编译即可。它们包括：
+
+````
+LOCAL_SRC_FILES：当前模块包含的所有源代码文件。
+LOCAL_MODULE：当前模块的名称，这个名称应当是唯一的，模块间的依赖关系就是通过这个名称来引用的。
+LOCAL_C_INCLUDES：C 或 C++ 语言需要的头文件的路径。LOCAL_STATIC_LIBRARIES：当前模块在静态链接时需要的库的名称。LOCAL_SHARED_LIBRARIES：当前模块在运行时依赖的动态库的名称。LOCAL_CFLAGS：提供给 C/C++ 编译器的额外编译参数。
+LOCAL_JAVA_LIBRARIES：当前模块依赖的 Java 共享库。
+LOCAL_STATIC_JAVA_LIBRARIES：当前模块依赖的 Java 静态库。LOCAL_PACKAGE_NAME：当前 APK 应用的名称。
+LOCAL_CERTIFICATE：签署当前应用的证书名称。
+LOCAL_MODULE_TAGS：当前模块所包含的标签，一个模块可以包含多个标签。标签的值可能是 debug, eng, user，development 或者 optional。其中，optional 是默认标签。标签是提供给编译类型使用的。不同的编译类型会安装包含不同标签的模块。
+````
+
+
+要编译一个 APK 文件，只需要在 Android.mk 文件中，加入“include $(BUILD_PACKAGE)
+除此以外，Build 系统中还定义了一些便捷的函数以便在 Android.mk 中使用，包括：
+
+
+````
+$(call my-dir)：获取当前文件夹路径。
+$(call all-java-files-under, <src>)：获取指定目录下的所有 Java 文件。
+$(call all-c-files-under, <src>)：获取指定目录下的所有 C 语言文件。
+$(call all-Iaidl-files-under, <src>) ：获取指定目录下的所有 AIDL 文件。
+$(call all-makefiles-under, <folder>)：获取指定目录下的所有 Make 文件。
+$(call intermediates-dir-for, <class>, <app_name>, <host or target>, <common?> )：获取 Build 输出的目标文件夹路径。
+编译一个 APK 文件
+  LOCAL_PATH := $(call my-dir) 
+  include $(CLEAR_VARS) 
+  # 获取所有子目录中的 Java 文件
+  LOCAL_SRC_FILES := $(call all-subdir-java-files) 			
+  # 当前模块依赖的静态 Java 库，如果有多个以空格分隔
+  LOCAL_STATIC_JAVA_LIBRARIES := static-library 
+  # 当前模块的名称
+  LOCAL_PACKAGE_NAME := LocalPackage 
+  # 编译 APK 文件
+  include $(BUILD_PACKAGE)
+
+编译一个 Java 的静态库
+  LOCAL_PATH := $(call my-dir) 
+  include $(CLEAR_VARS) 
+   
+  # 获取所有子目录中的 Java 文件
+  LOCAL_SRC_FILES := $(call all-subdir-java-files) 
+   
+  # 当前模块依赖的动态 Java 库名称
+  LOCAL_JAVA_LIBRARIES := android.test.runner 
+   
+  # 当前模块的名称
+  LOCAL_MODULE := sample 
+   
+  # 将当前模块编译成一个静态的 Java 库
+  include $(BUILD_STATIC_JAVA_LIBRARY)
+````

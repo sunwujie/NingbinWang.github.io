@@ -1,0 +1,90 @@
+# Site settings
+title: Skyline
+SEOTitle: 天际线的博客 | skyline blog
+header-img: img/home-bg.jpg
+email: 188101696@qq.com
+description: "摄影，代码，前端，安卓，ios都是我的兴趣哦"
+keyword: "工程师"
+url: "http://ningbinwang.github.io"              # your host, for absolute URL
+baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
+
+
+
+# SNS settings
+RSS: false
+weibo_username:     samuelwnb
+zhihu_username:     cnskeyline
+github_username:    NingbinWang
+# facebook_username:  samuel.wnb
+jianshu_username:   49e85998a845/timeline
+
+
+# Build settings
+# from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
+highlighter: rouge
+permalink: pretty
+paginate: 10
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
+
+
+
+# Gems
+# from PR#40, to support local preview for Jekyll 3.0
+gems: [jekyll-paginate]
+
+
+
+# Markdown settings
+# replace redcarpet to kramdown,
+# although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
+# document: http://jekyllrb.com/docs/configuration/#kramdown
+markdown: kramdown
+kramdown:
+  input: GFM                            # use Github Flavored Markdown !important
+
+
+
+# Disqus settings
+#disqus_username: _your_disqus_short_name_
+
+# Duoshuo settings
+duoshuo_username: cnskyline
+# Share component is depend on Comment so we can NOT use share only.
+duoshuo_share: true                     # set to false if you want to use Comment without Sharing
+
+
+
+
+# Analytics settings
+# Baidu Analytics
+ba_track_id: b44cf755939a409143a63873f969cd7c
+# Google Analytics
+ga_track_id: 'UA-65717037-2'            # Format: UA-xxxxxx-xx
+ga_domain: ningbinwang.github.io/cnskyline/
+
+
+
+# Sidebar settings
+sidebar: true                           # whether or not using Sidebar.
+sidebar-about-description: "BSP,Android,前端设计爱好者，硬件设计爱好者"
+sidebar-avatar: /img/avatar-alex.png      # use absolute URL, seeing it's used in both `/` and `/about/`
+
+
+
+# Featured Tags
+featured-tags: true                     # whether or not using Feature-Tags
+featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
+
+
+
+# Friends
+friends: [
+    {
+        title: " My CSDN Blog",
+        href: "http://blog.csdn.net/u013983194"
+    },{
+        title: "My Cnblog",
+        href: "http://www.cnblogs.com/samuelwnb/"
+    }
+]
