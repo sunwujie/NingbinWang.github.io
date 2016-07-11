@@ -6,8 +6,6 @@
 #修改笔记
 1、一定要注意_config.yml这个文件，在这个文件中将会定义你整个网页中所用的东西。
 
->我并没有像其他人一样直接建立了在github.io下，而是自己建立了一个分支gh-pages，通过向master分支提交，再merge到gh-pages分支上。
-
 首先，你得自己先将模版中各类信息换成自己的所属信息。
 
 ```
@@ -19,7 +17,7 @@ email: 188101696@qq.com
 description: "摄影，代码，前端，安卓，ios都是我的兴趣哦"
 keyword: "工程师"
 url: "http://ningbinwang.github.io"              # your host, for absolute URL
-baseurl: "/cnskyline"         # for example, '/blog' if your blog hosted on 'host/blog' 这里就是设置你的博客路径的地方，一般申请的io不需要放开此项用＃号注释掉
+baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog' 这里就是设置你的博客路径的地方，一般申请的io不需要放开此项用＃号注释掉
 
 ＃这里是一些账户
 # SNS settings
