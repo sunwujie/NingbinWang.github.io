@@ -79,16 +79,17 @@
 
 
 
-<meta name="description" content="the blog of personal technology and some pitures.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="The CnSkyline‘s Blog">
-<meta property="og:url" content="http://cnskyline.tech/index.html">
+<meta name="description" content="uboot简介&amp;nbsp;&amp;nbsp;&amp;nbsp;U-boot是标准的开放源码，主要的作用是系统引导。Uboot支持多种嵌入式操作系统内核，如Linux、NetBSD, VxWorks, QNX, RTEMS, ARTOS, LynxOS, android， 支持多个处理器系列，如PowerPC、ARM、x86、MIPS。根据具体的项目情况，我们需要修改uboot代码，来支持实际的项目需求。 &amp;n">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式开发扯淡系列1-浅谈uboot">
+<meta property="og:url" content="http://cnskyline.tech/2019/03/28/嵌入式开发扯淡系列1-浅谈uboot/index.html">
 <meta property="og:site_name" content="The CnSkyline‘s Blog">
-<meta property="og:description" content="the blog of personal technology and some pitures.">
+<meta property="og:description" content="uboot简介&amp;nbsp;&amp;nbsp;&amp;nbsp;U-boot是标准的开放源码，主要的作用是系统引导。Uboot支持多种嵌入式操作系统内核，如Linux、NetBSD, VxWorks, QNX, RTEMS, ARTOS, LynxOS, android， 支持多个处理器系列，如PowerPC、ARM、x86、MIPS。根据具体的项目情况，我们需要修改uboot代码，来支持实际的项目需求。 &amp;n">
 <meta property="og:locale" content="chinese">
+<meta property="og:updated_time" content="2019-03-27T16:38:42.360Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The CnSkyline‘s Blog">
-<meta name="twitter:description" content="the blog of personal technology and some pitures.">
+<meta name="twitter:title" content="嵌入式开发扯淡系列1-浅谈uboot">
+<meta name="twitter:description" content="uboot简介&amp;nbsp;&amp;nbsp;&amp;nbsp;U-boot是标准的开放源码，主要的作用是系统引导。Uboot支持多种嵌入式操作系统内核，如Linux、NetBSD, VxWorks, QNX, RTEMS, ARTOS, LynxOS, android， 支持多个处理器系列，如PowerPC、ARM、x86、MIPS。根据具体的项目情况，我们需要修改uboot代码，来支持实际的项目需求。 &amp;n">
 
 
 
@@ -118,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://cnskyline.tech/">
+  <link rel="canonical" href="http://cnskyline.tech/2019/03/28/嵌入式开发扯淡系列1-浅谈uboot/">
 
 
 
 
 
-  <title>The CnSkyline‘s Blog</title>
+  <title>嵌入式开发扯淡系列1-浅谈uboot | The CnSkyline‘s Blog</title>
   
 
 
@@ -143,8 +144,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -257,9 +257,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -289,9 +289,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/03/28/嵌入式开发扯淡系列1-浅谈uboot/" itemprop="url">嵌入式开发扯淡系列1-浅谈uboot</a></h1>
+          <h1 class="post-title" itemprop="name headline">嵌入式开发扯淡系列1-浅谈uboot</h1>
         
 
         <div class="post-meta">
@@ -341,9 +339,7 @@
       
 
       
-        
-          
-            <h1 id="uboot简介"><a href="#uboot简介" class="headerlink" title="uboot简介"></a>uboot简介</h1><p>&nbsp;&nbsp;&nbsp;U-boot是标准的开放源码，主要的作用是系统引导。Uboot支持多种嵌入式操作系统内核，如Linux、NetBSD, VxWorks, QNX, RTEMS, ARTOS, LynxOS, android， 支持多个处理器系列，如PowerPC、ARM、x86、MIPS。根据具体的项目情况，我们需要修改uboot代码，来支持实际的项目需求。</p>
+        <h1 id="uboot简介"><a href="#uboot简介" class="headerlink" title="uboot简介"></a>uboot简介</h1><p>&nbsp;&nbsp;&nbsp;U-boot是标准的开放源码，主要的作用是系统引导。Uboot支持多种嵌入式操作系统内核，如Linux、NetBSD, VxWorks, QNX, RTEMS, ARTOS, LynxOS, android， 支持多个处理器系列，如PowerPC、ARM、x86、MIPS。根据具体的项目情况，我们需要修改uboot代码，来支持实际的项目需求。</p>
 <p>&nbsp;&nbsp;&nbsp;Uboot的代码量很大，其实我们也不需要非常深入的学习，只需要定制的修改即可，但是我们还是需要了解uboot的启动过程。不然不知道如何下手，先从百度百科，了解个大致的信息。</p>
 <p>&nbsp;&nbsp;&nbsp;大多数BootLoader都分为stage1和stage2两大部分，U-boot也不例外。依赖于cpu体系结构的代码（如设备初始化代码等）通常都放在stage1且可以用汇编语言来实现，而stage2则通常用C语言来实现，这样可以实现复杂的功能，而且有更好的可读性和移植性。</p>
 <h2 id="stage1-汇编语言部分"><a href="#stage1-汇编语言部分" class="headerlink" title="stage1(汇编语言部分)"></a>stage1(汇编语言部分)</h2><p>&nbsp;&nbsp;&nbsp;U-boot的stage1代码通常放在start.s文件中，它用汇编语言写成，其主要代码部分如下：</p>
@@ -369,8 +365,6 @@
 <p>U-boot代码架构：</p>
 <p>├── api                 存放uboot提供的接口函数<br>├── arch               与体系结构相关的代码，uboot的重头戏<br>├── board             根据不同开发板定制的代码，代码也不少<br>├── common         通用的代码，涵盖各个方面，已命令行处理以及环境变量为主<br>├── disk                磁盘分区相关代码<br>├── doc                文档，一堆README开头的文件<br>├── drivers            驱动，很丰富，每种类型的设备驱动占用一个子目录<br>├── dts<br>├── examples        示例程序<br>├── fs                    文件系统，支持嵌入式开发板常见的文件系统<br>├── include           头文件，已通用的头文件为主<br>├── lib                   通用库文件<br>├── Licensens     授权<br>├── net                 网络相关代码，小型的协议栈<br>├── post               加电自检程序<br>├── scripts            脚本<br>└── tools              辅助程序，用于编译和检查uboot目标文件</p>
 
-          
-        
       
     </div>
     
@@ -387,12 +381,12 @@
       
 
       
+      
+      
 
       
 
       
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -402,10 +396,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -413,6 +408,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -433,8 +432,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -476,6 +484,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#uboot简介"><span class="nav-number">1.</span> <span class="nav-text">uboot简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#stage1-汇编语言部分"><span class="nav-number">1.1.</span> <span class="nav-text">stage1(汇编语言部分)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stage2（C语言代码部分）"><span class="nav-number">1.2.</span> <span class="nav-text">stage2（C语言代码部分）</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -609,6 +633,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
